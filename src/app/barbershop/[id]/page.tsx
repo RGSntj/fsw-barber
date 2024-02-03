@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { db } from "@/lib/prisma";
-import { ChevronLeftIcon, MapPinIcon, MenuIcon, StarIcon } from "lucide-react";
-import Image from "next/image";
 import { BarbershopInfo } from "./components/BarbershopInfo";
 import { ServiceItem } from "./components/ServiceItem";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 interface BarberShopDetailsParams {
   params: {
@@ -15,6 +15,8 @@ interface BarberShopDetailsParams {
 export default async function BarbershopDetails({
   params,
 }: BarberShopDetailsParams) {
+  const session = await getServerSession(authOptions);
+
   if (!params.id) {
     // TODO: redirecionar para a home page ..
     return null;
@@ -42,7 +44,13 @@ export default async function BarbershopDetails({
 
       <div className="px-5 flex flex-col gap-4 my-6">
         {barbershop.services.map((service) => {
-          return <ServiceItem key={service.id} service={service} />;
+          return (
+            <ServiceItem
+              key={service.id}
+              service={service}
+              isAuthenticated={!!session?.user}
+            />
+          );
         })}
       </div>
     </div>
