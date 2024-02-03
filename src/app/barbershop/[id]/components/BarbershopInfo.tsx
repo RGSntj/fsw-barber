@@ -1,8 +1,11 @@
 "use client";
 
+import { SideMenu } from "@/components/SideMenu";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Barbershop } from "@prisma/client";
 import { ChevronLeftIcon, MenuIcon, MapPinIcon, StarIcon } from "lucide-react";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -12,11 +15,20 @@ interface Props {
 }
 
 export function BarbershopInfo({ barbershop }: Props) {
+  const { data, status } = useSession();
   const router = useRouter();
 
   const handleBackClick = () => {
     router.back();
   };
+
+  // const handleLoginClick = async () => {
+  //   await signIn("google");
+  // };
+
+  // const handleLogoutClick = async () => {
+  //   await signOut();
+  // };
 
   return (
     <div>
@@ -30,13 +42,20 @@ export function BarbershopInfo({ barbershop }: Props) {
           <ChevronLeftIcon />
         </Button>
 
-        <Button
-          variant="outline"
-          size="icon"
-          className="absolute z-50 top-4 right-4 size-8"
-        >
-          <MenuIcon />
-        </Button>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className="absolute z-50 top-4 right-4 size-8"
+            >
+              <MenuIcon />
+            </Button>
+          </SheetTrigger>
+          <SheetContent className="p-0">
+            <SideMenu />
+          </SheetContent>
+        </Sheet>
 
         <Image
           src={barbershop.imageUrl}
