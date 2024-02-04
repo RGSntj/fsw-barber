@@ -48,6 +48,7 @@ export default async function BarbershopDetails({
             <ServiceItem
               key={service.id}
               service={service}
+              barbershop={barbershop}
               isAuthenticated={!!session?.user}
             />
           );

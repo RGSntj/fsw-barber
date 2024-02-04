@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Barbershop } from "@prisma/client";
 import { ChevronLeftIcon, MenuIcon, MapPinIcon, StarIcon } from "lucide-react";
-import { signIn, signOut, useSession } from "next-auth/react";
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -15,20 +14,11 @@ interface Props {
 }
 
 export function BarbershopInfo({ barbershop }: Props) {
-  const { data, status } = useSession();
   const router = useRouter();
 
   const handleBackClick = () => {
-    router.back();
+    router.replace("/");
   };
-
-  // const handleLoginClick = async () => {
-  //   await signIn("google");
-  // };
-
-  // const handleLogoutClick = async () => {
-  //   await signOut();
-  // };
 
   return (
     <div>
