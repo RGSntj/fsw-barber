@@ -13,12 +13,14 @@ import {
 } from "@/components/ui/sheet";
 import { Barbershop, Service } from "@prisma/client";
 import { ptBR } from "date-fns/locale";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { generateDayTimelist } from "../helpers/hours";
-import { format } from "date-fns";
+import { format, setHours, setMinutes } from "date-fns";
+import { saveBooking } from "../actions/save-booking";
+import { Loader2 } from "lucide-react";
 
 interface ServiceItemProps {
   barbershop: Barbershop;
@@ -31,15 +33,44 @@ export function ServiceItem({
   isAuthenticated,
   barbershop,
 }: ServiceItemProps) {
+  const [submitIsLoading, setSubmitIsLoading] = useState(false);
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [hour, setHour] = useState<string | undefined>(undefined);
+
+  const { data } = useSession();
 
   const handleBookingClick = () => {
     if (!isAuthenticated) {
       return signIn();
     }
+  };
 
-    // TODO: abrir modal de agendamento
+  const handleBookingSubmit = async () => {
+    setSubmitIsLoading(true);
+
+    try {
+      if (!hour || !date) {
+        return;
+      }
+
+      const dateHour = Number(hour.split(":")[0]);
+      const dateMinutes = Number(hour.split(":")[1]);
+
+      const newDate = setMinutes(setHours(date, dateHour), dateMinutes);
+
+      console.log(newDate);
+
+      await saveBooking({
+        barbershopId: barbershop.id,
+        serviceId: service.id,
+        date: newDate,
+        userId: (data?.user as any).id,
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setSubmitIsLoading(false);
+    }
   };
 
   const handleDateClick = (date: Date | undefined) => {
@@ -126,7 +157,6 @@ export function ServiceItem({
                     }}
                   />
 
-                  {/* ! TODO: Mostrar listas de horarios apenas se alguma data estiver selecionada ! */}
                   {date && (
                     <div className="flex gap-3 overflow-x-auto py-6 px-5 border-y border-solid border-secondary [&::-webkit-scrollbar]:hidden">
                       {timeList.map((time) => {
@@ -181,7 +211,15 @@ export function ServiceItem({
                   </div>
 
                   <SheetFooter className="px-5">
-                    <Button disabled={!hour || !date}>Confirmar reserva</Button>
+                    <Button
+                      disabled={!hour || !date || submitIsLoading}
+                      onClick={handleBookingSubmit}
+                    >
+                      {submitIsLoading && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                      Confirmar reserva
+                    </Button>
                   </SheetFooter>
                 </SheetContent>
               </Sheet>
